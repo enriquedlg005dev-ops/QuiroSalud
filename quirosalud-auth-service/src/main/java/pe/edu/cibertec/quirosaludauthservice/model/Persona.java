@@ -22,7 +22,6 @@ public abstract class Persona {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    // --- Getters y Setters explícitos para garantizar la herencia con JSON ---
     public Integer getIdPersona() { return idPersona; }
     public void setIdPersona(Integer idPersona) { this.idPersona = idPersona; }
 

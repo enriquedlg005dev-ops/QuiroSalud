@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Quiro_Proy.iml" filepath="$PROJECT_DIR$/.idea/Quiro_Proy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/quirosalud-pacientes-service/quirosalud-pacientes-service.iml" filepath="$PROJECT_DIR$/quirosalud-pacientes-service/quirosalud-pacientes-service.iml" />
+    </modules>
+  </component>
+</project>

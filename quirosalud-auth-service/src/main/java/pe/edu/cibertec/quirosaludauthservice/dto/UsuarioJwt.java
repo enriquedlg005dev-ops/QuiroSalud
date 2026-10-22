@@ -8,5 +8,7 @@ import lombok.Data;
 public class UsuarioJwt {
     private Integer idUsuario;
     private String email;
+    private String nombres;
+    private String cargo;
     private String token;
 }

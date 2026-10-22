@@ -7,14 +7,15 @@ import pe.edu.cibertec.quirosaludpacientesservice.repository.PacienteRepository;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
 
-    public PacienteService(PacienteRepository pacienteRepository) {
+    /*public PacienteService(PacienteRepository pacienteRepository) {
         this.pacienteRepository = pacienteRepository;
-    }
+    }*/
 
     public List<Paciente> listarTodos() {
         return pacienteRepository.findAll();

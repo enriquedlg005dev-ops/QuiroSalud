@@ -9,6 +9,7 @@ import pe.edu.cibertec.quirosaludpacientesservice.service.PacienteService;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/pacientes")
 
@@ -16,9 +17,9 @@ public class PacienteController {
 
     private final PacienteService pacienteService;
 
-    public PacienteController(PacienteService pacienteService) {
+    /*public PacienteController(PacienteService pacienteService) {
         this.pacienteService = pacienteService;
-    }
+    }*/
 
 
     // Endpoint para listar todos los pacientes (GET)

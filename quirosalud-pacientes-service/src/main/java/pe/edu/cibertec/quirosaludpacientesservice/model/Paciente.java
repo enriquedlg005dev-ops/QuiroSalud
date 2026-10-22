@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "tb_paciente")
 public class Paciente {
@@ -51,7 +55,7 @@ public class Paciente {
     @Column(name = "cod_distrito", length = 5, nullable = false)
     private String codDistrito;
 
-    public String getDni() {
+    /*public String getDni() {
         return dni;
     }
 
@@ -148,5 +152,5 @@ public class Paciente {
     }
 
     public Paciente() {
-    }
+    }*/
 }

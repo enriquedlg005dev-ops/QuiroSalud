@@ -43,6 +43,8 @@ public class AuthController {
                     .response(UsuarioJwt.builder()
                             .idUsuario(usuario.getIdUsuario())
                             .email(usuario.getEmail())
+                            .nombres(usuario.getNombres())
+                            .cargo(usuario.getCargo())
                             .token(token).build())
                     .build();
             return ResponseEntity.ok(response);

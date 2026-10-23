@@ -2,6 +2,7 @@ package pe.edu.cibertec.quirosaludpacientesservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pe.edu.cibertec.quirosaludpacientesservice.model.Paciente;
 import pe.edu.cibertec.quirosaludpacientesservice.repository.PacienteRepository;
 
@@ -29,6 +30,7 @@ public class PacienteService {
         return pacienteRepository.findByDni(dni);
     }
 
+    @Transactional
     public void eliminar(Integer id) {
         pacienteRepository.deleteById(id);
     }

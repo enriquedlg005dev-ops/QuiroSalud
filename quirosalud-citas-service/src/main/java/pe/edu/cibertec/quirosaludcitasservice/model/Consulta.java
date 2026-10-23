@@ -19,7 +19,6 @@ public class Consulta {
     @Column(name = "id_consulta")
     private Integer idConsulta;
 
-    // Columna real que ya existe en tu tbl_consulta de bd_quiro_t3
     @Column(name = "paciente_id", nullable = false)
     private Integer pacienteId;
 
@@ -46,7 +45,6 @@ public class Consulta {
     @Column(length = 20)
     private String estado = "PENDIENTE";
 
-    // Objeto temporal para que tu citas.html lea {{ c.paciente?.nombres }} igual que antes
     @Transient
     private PacienteDTO paciente;
 }

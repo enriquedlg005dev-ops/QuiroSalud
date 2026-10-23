@@ -47,6 +47,22 @@ services:
     ports: ["8083:8083"]
     networks: [quiro-internal]
 
+  ventas:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-ventas:${IMAGE_TAG:-dev}
+    build: ./quirosalud-ventas-service
+    depends_on:
+      eureka: { condition: service_started }
+      citas: { condition: service_started }
+      pacientes: { condition: service_started }
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+      DB_URL: jdbc:mysql://host.docker.internal:3306/bd_quiro_t3?useSSL=false&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:-UXVpcm9TYWx1ZFNlZ3VyaWRhZEp3dFNlY3JldEtleTIwMjYh}
+    ports: ["8084:8084"]
+    networks: [quiro-internal]
+
   gateway:
     image: ${DOCKERHUB_USER:-localquiro}/quirosalud-gateway:${IMAGE_TAG:-dev}
     build: ./quirosalud-api-gateway
@@ -55,6 +71,7 @@ services:
       auth: { condition: service_started }
       pacientes: { condition: service_started }
       citas: { condition: service_started }
+      ventas: { condition: service_started }
     environment:
       EUREKA_URL: http://eureka:8761/eureka/
     ports: ["8080:8080"]

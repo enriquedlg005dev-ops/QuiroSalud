@@ -13,6 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class HistorialClinicoDTO {
     private PacienteDTO paciente;
-    private List<Consulta> consultas; // Aquí el doctor ve el diagnóstico y cuántas sesiones recetó
-    private List<Cita> sesiones;      // Aquí ve las asistencias y notas de ajuste de cada sesión
+    private List<Consulta> consultas;
+    private List<Cita> sesiones;
 }

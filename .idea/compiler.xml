@@ -22,6 +22,15 @@
         <module name="quirosalud-citas-service" />
         <module name="quirosalud-auth-service" />
       </profile>
+      <profile name="Annotation profile for quirosalud-ventas-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="quirosalud-ventas-service" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -33,6 +42,7 @@
       <module name="quirosalud-pacientes-service" options="-parameters" />
       <module name="quirosalud-pacientes-service.main" options="-parameters" />
       <module name="quirosalud-pacientes-service.test" options="-parameters" />
+      <module name="quirosalud-ventas-service" options="-parameters" />
     </option>
   </component>
 </project>

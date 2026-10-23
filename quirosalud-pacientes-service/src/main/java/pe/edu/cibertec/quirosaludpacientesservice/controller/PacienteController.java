@@ -51,9 +51,14 @@ public class PacienteController {
     }
 
     @DeleteMapping({"/eliminar/{id}", "/{id}"})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MEDICO', 'ROLE_ASISTENTE')")
     public ResponseEntity<?> eliminarPaciente(@PathVariable("id") Integer id) {
-        pacienteService.eliminar(id);
-        return ResponseEntity.ok(Map.of("mensaje", "Paciente eliminado correctamente"));
+        try {
+            pacienteService.eliminar(id);
+            return ResponseEntity.ok(Map.of("mensaje", "Paciente eliminado correctamente"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al eliminar paciente: " + e.getMessage()));
+        }
     }
 }

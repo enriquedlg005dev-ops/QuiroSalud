@@ -24,7 +24,6 @@ public class ConsultaController {
     @GetMapping("/pendientes")
     public ResponseEntity<List<Consulta>> listarPendientes() {
         List<Consulta> pendientes = consultaRepository.findByEstado("PENDIENTE");
-        // Enriquecemos con Feign Client si tiene dniPaciente guardado
         for (Consulta c : pendientes) {
             if (c.getDniPaciente() != null) {
                 try {
@@ -38,7 +37,6 @@ public class ConsultaController {
     @PostMapping("/registro")
     public ResponseEntity<?> registrar(@RequestBody Consulta consulta) {
         try {
-            // Feign Client valida el DNI en quirosalud-pacientes-service (8082)
             PacienteDTO paciente = pacienteClient.obtenerPacientePorDni(consulta.getDniPaciente());
             consulta.setPacienteId(paciente.getIdPersona());
             consulta.setEstado("PENDIENTE");

@@ -24,20 +24,17 @@ public class CitaController {
     private final ConsultaRepository consultaRepository;
     private final PacienteClient pacienteClient;
 
-    // 1. Mantiene compatibilidad con tu tabla de sesiones en Asistencia
     @GetMapping("/historial/{dni}")
     public ResponseEntity<List<Cita>> buscarPorDni(@PathVariable("dni") String dni) {
         return ResponseEntity.ok(citaRepository.findByDniPacienteOrderByNumeroSesionAsc(dni));
     }
 
-    // 2. NUEVO: Devuelve el expediente completo (Datos del paciente + Diagnósticos + Sesiones)
     @GetMapping("/expediente/{dni}")
     public ResponseEntity<?> obtenerExpedienteCompleto(@PathVariable("dni") String dni) {
         PacienteDTO paciente = null;
         try {
             paciente = pacienteClient.obtenerPacientePorDni(dni);
         } catch (Exception ignored) {
-            // Si el paciente no existe o el servicio está apagado, igual devolvemos sus registros si los hubiera
         }
 
         List<Consulta> consultas = consultaRepository.findByDniPacienteOrderByIdConsultaDesc(dni);
@@ -47,7 +44,6 @@ public class CitaController {
         return ResponseEntity.ok(expediente);
     }
 
-    // 3. Marcar asistencia, registrar observación del ajuste y marcar si pagó esa sesión
     @PutMapping("/asistencia/{idCita}")
     public ResponseEntity<?> marcarAsistencia(@PathVariable("idCita") Integer idCita, @RequestBody Cita datosActualizados) {
         Cita citaBD = citaRepository.findById(idCita).orElse(null);
@@ -66,7 +62,6 @@ public class CitaController {
         return ResponseEntity.ok(citaRepository.save(citaBD));
     }
 
-    // 4. Endpoint interno para que el futuro microservicio de Ventas genere las N sesiones al emitir una Hoja de Pago
     @PostMapping("/generar-lote")
     public ResponseEntity<List<Cita>> generarLoteSesiones(@RequestBody List<Cita> nuevasSesiones) {
         return ResponseEntity.status(HttpStatus.CREATED).body(citaRepository.saveAll(nuevasSesiones));

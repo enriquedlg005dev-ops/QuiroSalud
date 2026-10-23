@@ -1,0 +1,13 @@
+FROM maven:3.9-eclipse-temurin-25 AS build
+WORKDIR /build
+COPY pom.xml .
+COPY src ./src
+RUN mvn -B -ntp clean package -DskipTests
+
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+RUN useradd --system --uid 10001 appuser
+COPY --from=build /build/target/*.jar /app/app.jar
+USER 10001
+EXPOSE 8084
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

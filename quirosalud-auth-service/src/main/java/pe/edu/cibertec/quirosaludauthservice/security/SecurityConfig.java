@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -23,29 +24,32 @@ import pe.edu.cibertec.quirosaludauthservice.service.DetalleUsuarioService;
 @Configuration
 public class SecurityConfig {
 
-    public final DetalleUsuarioService detalleUsuarioService;
+    private final DetalleUsuarioService detalleUsuarioService;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwt) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwt) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/login")
-                                .permitAll()
-                                .anyRequest().authenticated())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/actuator/**", "/error").permitAll()
+                        .anyRequest().authenticated())
                 .authenticationProvider(daoAuth())
                 .addFilterBefore(new FiltroJwtAuth(jwt), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
-    AuthenticationProvider daoAuth(){
+    AuthenticationProvider daoAuth() {
         DaoAuthenticationProvider daoAuth = new DaoAuthenticationProvider(detalleUsuarioService);
         daoAuth.setPasswordEncoder(passwordEncoder());
         return daoAuth;
     }
 
     @Bean
-    BCryptPasswordEncoder passwordEncoder(){
+    BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

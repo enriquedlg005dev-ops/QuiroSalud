@@ -13,15 +13,23 @@ public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
 
-    /*public PacienteService(PacienteRepository pacienteRepository) {
-        this.pacienteRepository = pacienteRepository;
-    }*/
-
     public List<Paciente> listarTodos() {
         return pacienteRepository.findAll();
     }
 
     public Paciente guardar(Paciente paciente) {
         return pacienteRepository.save(paciente);
+    }
+
+    public Paciente obtenerPorId(Integer id) {
+        return pacienteRepository.findById(id).orElse(null);
+    }
+
+    public Paciente obtenerPorDni(String dni) {
+        return pacienteRepository.findByDni(dni);
+    }
+
+    public void eliminar(Integer id) {
+        pacienteRepository.deleteById(id);
     }
 }

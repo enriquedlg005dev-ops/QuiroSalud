@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/quirosalud-eureka-server/pom.xml" />
         <option value="$PROJECT_DIR$/quirosalud-api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/quirosalud-pacientes-service/pom.xml" />
+        <option value="$PROJECT_DIR$/quirosalud-citas-service/pom.xml" />
       </list>
     </option>
   </component>

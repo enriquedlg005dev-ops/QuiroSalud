@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/quirosalud-api-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/quirosalud-auth-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/quirosalud-citas-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/quirosalud-eureka-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/quirosalud-pacientes-service/src/main/java" charset="UTF-8" />
   </component>

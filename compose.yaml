@@ -1,0 +1,81 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Definir MYSQL_ROOT_PASSWORD en .env}
+      MYSQL_DATABASE: bd_auth_service
+      MYSQL_USER: quiro
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD en .env}
+    volumes:
+      - quiro_mysql_data:/var/lib/mysql
+      - ./infra/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks: [quiro-internal]
+
+  eureka:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-eureka:${IMAGE_TAG:-dev}
+    build: ./quirosalud-eureka-server
+    ports: ["127.0.0.1:8761:8761"]
+    networks: [quiro-internal]
+
+  auth:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-auth:${IMAGE_TAG:-dev}
+    build: ./quirosalud-auth-service
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/bd_auth_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: quiro
+      DB_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD}
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Definir JWT_SECRET_BASE64}
+      SPRING_PROFILES_ACTIVE: dev
+      BOOTSTRAP_ENABLED: ${BOOTSTRAP_ENABLED:-false}
+      BOOTSTRAP_EMAIL: ${BOOTSTRAP_EMAIL:-}
+      BOOTSTRAP_PASSWORD: ${BOOTSTRAP_PASSWORD:-}
+    networks: [quiro-internal]
+
+  pacientes:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-pacientes:${IMAGE_TAG:-dev}
+    build: ./quirosalud-pacientes-service
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/bd_pacientes_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: quiro
+      DB_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD}
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Definir JWT_SECRET_BASE64}
+    networks: [quiro-internal]
+
+  gateway:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-gateway:${IMAGE_TAG:-dev}
+    build: ./quirosalud-api-gateway
+    depends_on:
+      eureka: { condition: service_started }
+      auth: { condition: service_started }
+      pacientes: { condition: service_started }
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+      FRONTEND_ORIGIN: http://localhost:4200
+    ports: ["127.0.0.1:8080:8080"]
+    networks: [quiro-internal]
+
+  frontend:
+    image: ${DOCKERHUB_USER:-localquiro}/quirosalud-frontend:${IMAGE_TAG:-dev}
+    build: ${FRONTEND_BUILD_CONTEXT:-./quirosalud-frontend-main}
+    depends_on:
+      gateway: { condition: service_started }
+    ports: ["127.0.0.1:4200:80"]
+    networks: [quiro-internal]
+
+networks:
+  quiro-internal: {}
+volumes:
+  quiro_mysql_data: {}

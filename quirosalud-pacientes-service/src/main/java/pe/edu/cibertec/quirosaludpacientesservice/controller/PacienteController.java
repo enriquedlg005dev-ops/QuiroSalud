@@ -1,38 +1,52 @@
 package pe.edu.cibertec.quirosaludpacientesservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import pe.edu.cibertec.quirosaludpacientesservice.model.Paciente;
+import pe.edu.cibertec.quirosaludpacientesservice.dto.*;
 import pe.edu.cibertec.quirosaludpacientesservice.service.PacienteService;
 
+import java.net.URI;
 import java.util.List;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/pacientes")
-
 public class PacienteController {
-
     private final PacienteService pacienteService;
 
-    /*public PacienteController(PacienteService pacienteService) {
-        this.pacienteService = pacienteService;
-    }*/
-
-
-    // Endpoint para listar todos los pacientes (GET)
     @GetMapping
-    public ResponseEntity<List<Paciente>> listarPacientes() {
-        List<Paciente> pacientes = pacienteService.listarTodos();
-        return new ResponseEntity<>(pacientes, HttpStatus.OK); // Retorna 200 OK
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ASISTENTE')")
+    public List<PacienteResponse> listar() { return pacienteService.listarTodos(); }
+
+    @GetMapping("/{dni}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ASISTENTE')")
+    public PacienteResponse buscar(@PathVariable String dni) { return pacienteService.buscar(dni); }
+
+    @GetMapping("/{dni}/historia")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO')")
+    public HistoriaResponse historia(@PathVariable String dni) { return pacienteService.obtenerHistoria(dni); }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ASISTENTE')")
+    public ResponseEntity<PacienteResponse> crear(@Valid @RequestBody PacienteRequest datos, Authentication usuario) {
+        PacienteResponse creado = pacienteService.guardar(datos, usuario);
+        return ResponseEntity.created(URI.create("/api/v1/pacientes/" + creado.dni())).body(creado);
     }
 
-    // Endpoint para registrar un nuevo paciente (POST)
-    @PostMapping
-    public ResponseEntity<Paciente> registrarPaciente(@RequestBody Paciente paciente) {
-        Paciente nuevoPaciente = pacienteService.guardar(paciente);
-        return new ResponseEntity<>(nuevoPaciente, HttpStatus.CREATED); // Retorna 201 Created
+    @PutMapping("/{dni}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ASISTENTE')")
+    public PacienteResponse editar(@PathVariable String dni, @Valid @RequestBody PacienteRequest datos,
+                                   Authentication usuario) {
+        return pacienteService.actualizar(dni, datos, usuario);
     }
+
+    @DeleteMapping("/{dni}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminar(@PathVariable String dni) { pacienteService.eliminar(dni); }
 }

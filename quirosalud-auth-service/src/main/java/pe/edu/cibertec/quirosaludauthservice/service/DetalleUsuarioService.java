@@ -13,6 +13,7 @@ import pe.edu.cibertec.quirosaludauthservice.repository.UsuarioRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +30,7 @@ public class DetalleUsuarioService implements UserDetailsService {
     }
 
     public List<GrantedAuthority> getAuthorities(Usuario usuario) {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getCargo()));
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getCargo().trim().toUpperCase(Locale.ROOT)));
     }
 
     public UserDetails getUserDetails(Usuario usuario, List<GrantedAuthority> authorities) {

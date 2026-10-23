@@ -1,4 +1,4 @@
-# Checklist de verificación — Fase 1
+# Checklist de verificación 
 
 No utilizar datos personales reales para estas pruebas. Inicializar los esquemas nuevos, no reemplazar el anterior.
 

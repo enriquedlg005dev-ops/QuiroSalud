@@ -1,0 +1,127 @@
+# Imagenes descargadas desde Docker Hub, SIN compilacion local.
+name: quirosalud-local
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configure .env}
+      MYSQL_DATABASE: bd_quiro_t3
+      MYSQL_USER: quiro
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Configure .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/01-auth-schema.sql:/docker-entrypoint-initdb.d/01-auth-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'mysqladmin ping --host=127.0.0.1 --user=root --password="$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks: [quiro]
+    restart: unless-stopped
+
+  eureka:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-eureka:${IMAGE_TAG:-dev}
+    ports: ["8761:8761"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  auth:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-auth:${IMAGE_TAG:-dev}
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_quiro_t3?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: quiro
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Configure .env}
+      EUREKA_URL: http://eureka:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Configure .env}
+      SPRING_PROFILES_ACTIVE: dev
+      APP_BOOTSTRAP_ENABLED: "true"
+      APP_BOOTSTRAP_EMAIL: ${BOOTSTRAP_EMAIL:?Configure .env}
+      APP_BOOTSTRAP_PASSWORD: ${BOOTSTRAP_PASSWORD:?Configure .env}
+      APP_BOOTSTRAP_NAME: Administrador
+      APP_BOOTSTRAP_LASTNAME: QuiroSalud
+    ports: ["8081:8081"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  pacientes:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-pacientes:${IMAGE_TAG:-dev}
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_quiro_t3?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: quiro
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Configure .env}
+      EUREKA_URL: http://eureka:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Configure .env}
+    ports: ["8082:8082"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  citas:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-citas:${IMAGE_TAG:-dev}
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+      pacientes: { condition: service_started }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_quiro_t3?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: quiro
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Configure .env}
+      EUREKA_URL: http://eureka:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports: ["8083:8083"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  ventas:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-ventas:${IMAGE_TAG:-dev}
+    depends_on:
+      mysql: { condition: service_healthy }
+      eureka: { condition: service_started }
+      citas: { condition: service_started }
+      pacientes: { condition: service_started }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_quiro_t3?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: quiro
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Configure .env}
+      EUREKA_URL: http://eureka:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Configure .env}
+    ports: ["8084:8084"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  gateway:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-gateway:${IMAGE_TAG:-dev}
+    depends_on:
+      eureka: { condition: service_started }
+      auth: { condition: service_started }
+      pacientes: { condition: service_started }
+      citas: { condition: service_started }
+      ventas: { condition: service_started }
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports: ["8080:8080"]
+    networks: [quiro]
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKERHUB_USER:-echavez85}/quirosalud-frontend:${IMAGE_TAG:-dev}
+    depends_on:
+      gateway: { condition: service_started }
+    ports: ["4200:80"]
+    networks: [quiro]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+networks:
+  quiro:
